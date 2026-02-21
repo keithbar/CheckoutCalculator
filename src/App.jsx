@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { calculateRequiredPrincipal } from './utils/calculations';
 import CurrencyInput from 'react-currency-input-field';
+import { STATE_TAX } from './utils/taxes'
 import './App.css';
 
 function App() {
@@ -10,6 +11,10 @@ function App() {
   const [healthDeclineStartAge, setHealthDeclineStartAge] = useState(65);
   const [healthDeclineMaxAge, setHealthDeclineMaxAge] = useState(75);
   const [maxAnnualSpending, setMaxAnnualSpending] = useState(80000);
+  const [selectedState, setSelectedState] = useState("California");
+  const [leftover, setLeftover] = useState(0);
+
+  const stateNames = Object.keys(STATE_TAX);
 
   const result = calculateRequiredPrincipal({
     currentAge,
@@ -17,7 +22,9 @@ function App() {
     annualSpending,
     healthDeclineStartAge,
     healthDeclineMaxAge,
-    maxAnnualSpending
+    maxAnnualSpending,
+    selectedState,
+    leftover
   });
 
   return(
@@ -126,6 +133,44 @@ function App() {
           />
           <small className="helper-text">
             Consider the costs of late-life services, such as in-home care or assisted living.
+          </small>
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="selected-state">
+            What state do you plan to live in when retired?
+          </label>
+          <select
+            value={selectedState}
+            onChange={(e) => setSelectedState(e.target.value)}
+          >
+            {stateNames.map((state) => (
+              <option key={state} value={state}>
+                {state}
+              </option>
+            ))}
+          </select>
+          <small className="helper-text">
+            This will be used to help estimate tax burden of withdrawals.
+          </small>
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="leftover">
+            How much money would like to have left over after you die?
+          </label>
+          <CurrencyInput
+            id="leftover"
+            value={leftover}
+            onValueChange={(value, name, values) =>
+              setLeftover(values?.float ?? 0)
+            }
+            intlConfig={{ locale: "en-US", currency: "USD" }}
+            decimalsLimit={0}
+            allowNegativeValue={false}
+          />
+          <small className="helper-text">
+            In today's dollars, how much do you want to leave behind when you die, for inheritances, etc.?
           </small>
         </div>
 
