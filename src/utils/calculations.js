@@ -8,15 +8,14 @@ function getApyFromAge(age, startingAge, projectedAge, marketScenario){
     const APY_DYING = 1.03;
 
     let ageDifference = age - startingAge;
-    let retirementLength = projectedAge - startingAge;
-    let marketScenarioYears = MARKET_SCENARIOS[marketScenario].proportion * retirementLength;
-    if(ageDifference < marketScenarioYears){
+    let retirementLength = Math.max(1, projectedAge - startingAge);
+    let retirementProgress = ageDifference / retirementLength;
+    
+    if(retirementProgress < MARKET_SCENARIOS[marketScenario].proportion)
         return MARKET_SCENARIOS[marketScenario].rate;
-    }
-
-    if(age < 50) return APY_YOUNG;
-    else if(age < 65) return APY_RETIRING;
-    else if(age < 80) return APY_ELDERLY;
+    else if(retirementProgress < 0.3) return APY_YOUNG;
+    else if(retirementProgress < 0.6) return APY_RETIRING;
+    else if(retirementProgress < 0.85) return APY_ELDERLY;
     else return APY_DYING;
 }
 

@@ -15,26 +15,61 @@ function App() {
   const [selectedState, setSelectedState] = useState("California");
   const [leftover, setLeftover] = useState(0);
   const [marketScenario, setMarketScenario] = useState("rough");
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState("");
 
   const stateNames = Object.keys(STATE_TAX);
 
-  const result = calculateRequiredPrincipal({
-    currentAge,
-    projectedAge,
-    annualSpending,
-    healthDeclineStartAge,
-    healthDeclineMaxAge,
-    maxAnnualSpending,
-    selectedState,
-    leftover,
-    marketScenario
-  });
+  function handleCalculate(e){
+    e.preventDefault(); // prevent form reload
+
+    // Form validation
+    if(projectedAge <= currentAge){
+      setError("Age of death must be greater than current age.");
+      setResult(null);
+      return;
+    }
+
+    if(healthDeclineStartAge < currentAge){
+      setError("Age of beginning health decline cannot be before current age.");
+      setResult(null);
+      return;
+    }
+
+    if(healthDeclineMaxAge < healthDeclineStartAge){
+      setError("Max health decline age must be greater than health decline starting age.");
+      setResult(null);
+      return;
+    }
+
+    if(projectedAge < healthDeclineMaxAge){
+      setError("Max health decline age must not be greater than age of death.");
+      setResult(null);
+      return;
+    }
+
+    setError("");
+
+    const result = calculateRequiredPrincipal({
+      currentAge,
+      projectedAge,
+      annualSpending,
+      healthDeclineStartAge,
+      healthDeclineMaxAge,
+      maxAnnualSpending,
+      selectedState,
+      leftover,
+      marketScenario
+    });
+
+    setResult(result);
+  }
 
   return(
     <div>
       <h1>Checkout Calculator</h1>
 
-      <form className="calculator-form">
+      <form className="calculator-form" onSubmit={handleCalculate}>
         
         <div className="form-group">
           <label htmlFor="current-age">
@@ -44,6 +79,7 @@ function App() {
             id="current-age"
             type="number"
             min="0"
+            max="120"
             value={currentAge}
             onChange={(e) => setCurrentAge(Number(e.target.value))}
           />
@@ -60,6 +96,7 @@ function App() {
             id="projected-age"
             type="number"
             min={currentAge}
+            max="140"
             value={projectedAge}
             onChange={(e) => setProjectedAge(Number(e.target.value))}
           />
@@ -95,6 +132,7 @@ function App() {
             id="health-decline-start-age"
             type="number"
             min={currentAge}
+            max={projectedAge}
             value={healthDeclineStartAge}
             onChange={(e) => setHealthDeclineStartAge(Number(e.target.value))}
           />
@@ -111,6 +149,7 @@ function App() {
             id="health-decline-max-age"
             type="number"
             min={healthDeclineStartAge}
+            max={projectedAge}
             value={healthDeclineMaxAge}
             onChange={(e) => setHealthDeclineMaxAge(Number(e.target.value))}
           />
@@ -197,9 +236,15 @@ function App() {
           </small>
         </div>
 
+        <button type="submit">Run Calculation</button>
+
       </form>
 
-      <p>Required Principal: ${result.toLocaleString()}</p>
+      {error && <p className="error">{error}</p>}
+
+      {result != null && (
+        <p>Required Principal: ${result.toLocaleString()}</p>
+      )}
     </div>
   );
 }
