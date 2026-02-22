@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { calculateRequiredPrincipal } from './utils/calculations';
 import CurrencyInput from 'react-currency-input-field';
 import { STATE_TAX } from './utils/taxes'
+import { MARKET_SCENARIOS } from './utils/constants';
 import './App.css';
 
 function App() {
@@ -13,6 +14,7 @@ function App() {
   const [maxAnnualSpending, setMaxAnnualSpending] = useState(80000);
   const [selectedState, setSelectedState] = useState("California");
   const [leftover, setLeftover] = useState(0);
+  const [marketScenario, setMarketScenario] = useState("rough");
 
   const stateNames = Object.keys(STATE_TAX);
 
@@ -24,7 +26,8 @@ function App() {
     healthDeclineMaxAge,
     maxAnnualSpending,
     selectedState,
-    leftover
+    leftover,
+    marketScenario
   });
 
   return(
@@ -171,6 +174,26 @@ function App() {
           />
           <small className="helper-text">
             In today's dollars, how much do you want to leave behind when you die, for inheritances, etc.?
+          </small>
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="market-scenario">
+            How lucky are you feeling in regards to market performance?
+          </label>
+          <select
+            id="market-scenario"
+            value={marketScenario}
+            onChange={(e) => setMarketScenario(e.target.value)}
+          >
+            {Object.entries(MARKET_SCENARIOS).map(([key, scenario]) => (
+              <option key={key} value={key}>
+                {scenario.label}
+              </option>
+            ))}
+          </select>
+          <small className="helper-text">
+            Simulates different market return sequences. The worse the early performance, the more conservative the final estimate will be.
           </small>
         </div>
 
