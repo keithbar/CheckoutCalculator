@@ -1,6 +1,24 @@
 import { MARKET_SCENARIOS } from "./constants";
 import { calculateGrossFromNet } from "./calculateTaxes";
 
+// Flag for printing calculation details to the console.
+// Set to true to see all relevant values for each year of retirement.
+const DEBUG = false;
+
+function debugPrintInfo(
+    age,
+    fundsRemaining,
+    spending,
+    spendingPlusTaxes,
+    rate
+){
+    let apy = (rate - 1) * 100;
+    console.log("At age " + age + ", $" + Math.round(fundsRemaining).toLocaleString() + 
+        " remain, after spending $" + Math.round(spending).toLocaleString() + " and paying $" + 
+        Math.round(spendingPlusTaxes - spending).toLocaleString() + 
+        " in taxes. APY for the year: " + apy.toFixed(1) + "%");
+}
+
 function getApyFromAge(age, startingAge, projectedAge, marketScenario){
     const APY_YOUNG = 1.055;
     const APY_RETIRING = 1.05;
@@ -43,22 +61,19 @@ export function calculateRequiredPrincipal({
         let spendingPlusTaxes = calculateGrossFromNet(selectedState, maxAnnualSpending);
         let apy = getApyFromAge(age, currentAge, projectedAge, marketScenario);
         fundsRemaining = fundsRemaining / apy + spendingPlusTaxes;
-        console.log("At age " + age + ", $" + fundsRemaining + " remain, after spending $" + maxAnnualSpending + " and paying $" + (spendingPlusTaxes - maxAnnualSpending) + " in taxes");
-        console.log("      APY for the year: " + apy);
+        if(DEBUG) debugPrintInfo(age, fundsRemaining, maxAnnualSpending, spendingPlusTaxes, apy);
     }
 
     // B: spending shifts from lowest to highest
     let totalAnnualSpendingDifference = maxAnnualSpending - annualSpending;
     let spendingAgeDifference = healthDeclineMaxAge - healthDeclineStartAge + 1;
     let annualSpendingChange = totalAnnualSpendingDifference / spendingAgeDifference;
-    console.log("Annual Spending Change: $" + annualSpendingChange)
     for(let age = healthDeclineMaxAge - 1; age >= healthDeclineStartAge; age--){
         let spending = annualSpending + annualSpendingChange * (age - healthDeclineStartAge + 1);
         let spendingPlusTaxes = calculateGrossFromNet(selectedState, spending);
         let apy = getApyFromAge(age, currentAge, projectedAge, marketScenario);
         fundsRemaining = fundsRemaining / apy + spendingPlusTaxes;
-        console.log("At age " + age + ", $" + fundsRemaining + " remain, after spending $" + spending + " and paying $" + (spendingPlusTaxes - spending) + " in taxes");
-        console.log("      APY for the year: " + apy);
+        if(DEBUG) debugPrintInfo(age, fundsRemaining, spending, spendingPlusTaxes, apy);
     }
 
     // A: current spending
@@ -66,8 +81,7 @@ export function calculateRequiredPrincipal({
         let spendingPlusTaxes = calculateGrossFromNet(selectedState, annualSpending);
         let apy = getApyFromAge(age, currentAge, projectedAge, marketScenario);
         fundsRemaining = fundsRemaining / apy + spendingPlusTaxes;
-        console.log("At age " + age + ", $" + fundsRemaining + " remain, after spending $" + annualSpending + " and paying $" + (spendingPlusTaxes - annualSpending) + " in taxes");
-        console.log("      APY for the year: " + apy);
+        if(DEBUG) debugPrintInfo(age, fundsRemaining, annualSpending, spendingPlusTaxes, apy);
     }
 
     return fundsRemaining;
