@@ -243,7 +243,7 @@ function App() {
       {error && <p className="error">{error}</p>}
 
       {result != null && (
-        <p>Required Principal: ${result.toLocaleString()}</p>
+        <p>Required Principal: ${Math.round(result).toLocaleString()}</p>
       )}
     </div>
   );
