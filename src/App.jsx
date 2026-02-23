@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { calculateRequiredPrincipal } from './utils/calculations';
 import CurrencyInput from 'react-currency-input-field';
 import { STATE_TAX } from './utils/taxes'
@@ -16,7 +16,14 @@ function App() {
   const [leftover, setLeftover] = useState(10000);
   const [marketScenario, setMarketScenario] = useState("rough");
   const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState({});
+
+  const currentAgeRef = useRef(null);
+  const projectedAgeRef = useRef(null);
+  const annualSpendingRef = useRef(null);
+  const healthDeclineStartAgeRef = useRef(null);
+  const healthDeclineMaxAgeRef = useRef(null);
+  const maxAnnualSpendingRef = useRef(null);
 
   const stateNames = Object.keys(STATE_TAX);
 
@@ -30,41 +37,87 @@ function App() {
     }
   }, [result]);
 
-  function handleCalculate(e){
-    e.preventDefault(); // prevent form reload
+  function validateInput(){
+    const newErrors = {};
 
-    // Form validation
+    if(currentAge < 0 || currentAge > 130){
+      newErrors.currentAge = 
+        "Current age must be a number between 0 and 130.";
+    }
+
     if(projectedAge <= currentAge){
-      setError("Age of death must be greater than current age.");
-      setResult(null);
-      return;
+      newErrors.projectedAge = 
+        "Age of death must be greater than current age.";
+    }
+
+    if(projectedAge > 150){
+      newErrors.projectedAge =
+        "Age of death must not exceed 150. Maybe some day!";
+    }
+
+    if(annualSpending < 0){
+      newErrors.annualSpending =
+        "Annual spending must be a positive number.";
     }
 
     if(healthDeclineStartAge < currentAge){
-      setError("Age of beginning health decline cannot be before current age.");
-      setResult(null);
-      return;
+      newErrors.healthDeclineStartAge =
+        "Age of beginning health decline cannot be before current age.";
+    }
+
+    if(healthDeclineStartAge > projectedAge){
+      newErrors.healthDeclineStartAge =
+        "Age of beginning health decline cannot exceed age of death.";
     }
 
     if(healthDeclineMaxAge < healthDeclineStartAge){
-      setError("Max health decline age must be greater than health decline starting age.");
-      setResult(null);
-      return;
+      newErrors.healthDeclineMaxAge = 
+        "Max health decline age must be greater than health decline starting age.";
     }
 
-    if(projectedAge < healthDeclineMaxAge){
-      setError("Max health decline age must not be greater than age of death.");
-      setResult(null);
-      return;
+    if(healthDeclineMaxAge > projectedAge){
+      newErrors.healthDeclineMaxAge = 
+        "Max health decline age must not be greater than age of death.";
     }
 
     if(maxAnnualSpending < annualSpending){
-      setError("Peak annual spending cannot be less than typical annual spending.");
+      newErrors.maxAnnualSpending = 
+        "Peak annual spending cannot be less than typical annual spending.";
+    }
+
+    return newErrors;
+  }
+
+  function handleCalculate(e){
+    e.preventDefault(); // prevent form reload
+
+    const validationErrors = validateInput();
+    if(Object.keys(validationErrors).length > 0){
+      setErrors(validationErrors);
       setResult(null);
+
+      const firstErrorKey = Object.keys(validationErrors)[0];
+
+      const refMap = {
+        currentAge: currentAgeRef,
+        projectedAge: projectedAgeRef,
+        annualSpending: annualSpendingRef,
+        healthDeclineStartAge: healthDeclineStartAgeRef,
+        healthDeclineMaxAge: healthDeclineMaxAgeRef,
+        maxAnnualSpending: maxAnnualSpendingRef
+      };
+
+      const targetRef = refMap[firstErrorKey];
+
+      if(targetRef?.current){
+        targetRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+        targetRef.current.focus();
+      }
+
       return;
     }
 
-    setError("");
+    setErrors({});
 
     const result = calculateRequiredPrincipal({
       currentAge,
@@ -101,16 +154,18 @@ function App() {
             How old are you now?
           </label>
           <input
+            ref={currentAgeRef}
             id="current-age"
             type="number"
-            min="0"
-            max="120"
             value={currentAge}
             onChange={(e) => setCurrentAge(Number(e.target.value))}
           />
           <small className="helper-text">
             Enter your current age in years.
           </small>
+          {errors.currentAge && (
+            <p className="field-error">{errors.currentAge}</p>
+          )}
         </div>
 
         <div className="form-group">
@@ -118,16 +173,18 @@ function App() {
             To what age do you expect to live?
           </label>
           <input
+            ref={projectedAgeRef}
             id="projected-age"
             type="number"
-            min={currentAge}
-            max="140"
             value={projectedAge}
             onChange={(e) => setProjectedAge(Number(e.target.value))}
           />
           <small className="helper-text">
             When do you expect to die? Consider health, lifestyle, and family history.
           </small>
+          {errors.projectedAge && (
+            <p className="field-error">{errors.projectedAge}</p>
+          )}
         </div>
 
         <div className="form-group">
@@ -135,6 +192,7 @@ function App() {
             What is your annual spending?
           </label>
           <CurrencyInput
+            ref={annualSpendingRef}
             id="annual-spending"
             value={annualSpending}
             onValueChange={(value, name, values) =>
@@ -147,6 +205,9 @@ function App() {
           <small className="helper-text">
             In today's dollars, how much do you expect to spend annually if you maintain your current lifestyle? Include all spending, including housing, food, healthcare, recreation, etc.
           </small>
+          {errors.annualSpending && (
+            <p className="field-error">{errors.annualSpending}</p>
+          )}
         </div>
 
         <div className="form-group">
@@ -154,16 +215,18 @@ function App() {
             At what age do you expect your cost of living to increase?
           </label>
           <input
+            ref={healthDeclineStartAgeRef}
             id="health-decline-start-age"
             type="number"
-            min={currentAge}
-            max={projectedAge}
             value={healthDeclineStartAge}
             onChange={(e) => setHealthDeclineStartAge(Number(e.target.value))}
           />
           <small className="helper-text">
             Consider increased cost of health care with age, such as more frequent doctor visits, more frequent medical procedures, and disability-related expenses.
           </small>
+          {errors.healthDeclineStartAge && (
+            <p className="field-error">{errors.healthDeclineStartAge}</p>
+          )}
         </div>
 
         <div className="form-group">
@@ -171,16 +234,18 @@ function App() {
             At what age do you expect your cost of living to be at its highest?
           </label>
           <input
+            ref={healthDeclineMaxAgeRef}
             id="health-decline-max-age"
             type="number"
-            min={healthDeclineStartAge}
-            max={projectedAge}
             value={healthDeclineMaxAge}
             onChange={(e) => setHealthDeclineMaxAge(Number(e.target.value))}
           />
           <small className="helper-text">
             Consider late-life lifestyle changes, such as home health care, assisted living, extended hospital stays, and medical equipment.
           </small>
+          {errors.healthDeclineMaxAge && (
+            <p className="field-error">{errors.healthDeclineMaxAge}</p>
+          )}
         </div>
 
         <div className="form-group">
@@ -188,8 +253,8 @@ function App() {
             What do you expect your annual spending (in today's dollars) to be at its peak?
           </label>
           <CurrencyInput
+            ref={maxAnnualSpendingRef}
             id="max-annual-spending"
-            min={annualSpending}
             value={maxAnnualSpending}
             onValueChange={(value, name, values) =>
               setMaxAnnualSpending(values?.float ?? 0)
@@ -201,6 +266,9 @@ function App() {
           <small className="helper-text">
             Consider the costs of late-life services, such as home health care, assisted living, extended hospital stays, and medical equipment.
           </small>
+          {errors.maxAnnualSpending && (
+            <p className="field-error">{errors.maxAnnualSpending}</p>
+          )}
         </div>
 
         <div className="form-group">
@@ -264,8 +332,6 @@ function App() {
         <button type="submit">Run Calculation</button>
 
       </form>
-
-      {error && <p className="error">{error}</p>}
 
       {result != null && (
         <p className="result">Required Principal: ${Math.round(result).toLocaleString()}</p>
