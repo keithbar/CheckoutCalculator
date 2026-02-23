@@ -6,7 +6,7 @@ This calculator models annual spending, increasing late-life healthcare costs, t
 
 The tool can be accessed at the following URL:
 
-`TODO: add URL`
+`https://keithbar.github.io/CheckoutCalculator/`
 
 ## How it works
 
