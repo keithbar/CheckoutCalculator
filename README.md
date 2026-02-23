@@ -5,6 +5,7 @@ A browser-based retirement planning tool that estimates the lump sum principal r
 This calculator models annual spending, increasing late-life healthcare costs, taxes, market return scenarios, and inheritance goals to estimate how much capital would be required to retire today.
 
 The tool can be accessed at the following URL:
+
 `TODO: add URL`
 
 ## How it works
@@ -36,7 +37,9 @@ This tool:
 
 If you'd like to run it locally yourself:
 
-```npm install
-npm run dev```
+```bash
+npm install
+npm run dev
+```
 
 Then open the local development URL shown in your terminal.
