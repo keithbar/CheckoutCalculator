@@ -1,16 +1,42 @@
-# React + Vite
+# Checkout Calculator: Can you check out?
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A browser-based retirement planning tool that estimates the lump sum principal required to fund your current lifestyle for the rest of your life.
 
-Currently, two official plugins are available:
+This calculator models annual spending, increasing late-life healthcare costs, taxes, market return scenarios, and inheritance goals to estimate how much capital would be required to retire today.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+The tool can be accessed at the following URL:
+`TODO: add URL`
 
-## React Compiler
+## How it works
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+This app:
+- Projects yearly spending from current age to projected death
+- Gradually increases spending at user-defined intervals to simulate age-related healthcare costs
+- Applies state and federal tax assumptions
+- Simulates different market return scenarios (optimistic, average, pessimistic)
+- Works backward to determine the minimum principal required today
 
-## Expanding the ESLint configuration
+## Tech stack
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- React (functional components and hooks)
+- Vite (build tool and dev server)
+- JavaScript (ES6+)
+- CSS
+
+Fully client-side; no backend or database.
+
+## Assumptions and limitations
+
+This tool:
+- Does not model inflation separately (all values are assumed in today's dollars, with market returns adjusted accordingly)
+- Uses simplified tax and return assumptions
+- Does not provide financial advice
+
+## Running locally
+
+If you'd like to run it locally yourself:
+
+```npm install
+npm run dev```
+
+Then open the local development URL shown in your terminal.

@@ -20,7 +20,7 @@ function App() {
 
   const stateNames = Object.keys(STATE_TAX);
 
-  // Scroll down after calculating results
+  // Scroll down after updating results
   useEffect(() => {
     if(result != null){
       window.scrollTo({
