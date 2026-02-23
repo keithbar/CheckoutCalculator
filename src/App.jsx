@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { calculateRequiredPrincipal } from './utils/calculations';
 import CurrencyInput from 'react-currency-input-field';
 import { STATE_TAX } from './utils/taxes'
@@ -19,6 +19,16 @@ function App() {
   const [error, setError] = useState("");
 
   const stateNames = Object.keys(STATE_TAX);
+
+  // Scroll down after calculating results
+  useEffect(() => {
+    if(result != null){
+      window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: "smooth"
+      });
+    }
+  }, [result]);
 
   function handleCalculate(e){
     e.preventDefault(); // prevent form reload
