@@ -13,7 +13,7 @@ function App() {
   const [healthDeclineMaxAge, setHealthDeclineMaxAge] = useState(75);
   const [maxAnnualSpending, setMaxAnnualSpending] = useState(80000);
   const [selectedState, setSelectedState] = useState("California");
-  const [leftover, setLeftover] = useState(0);
+  const [leftover, setLeftover] = useState(10000);
   const [marketScenario, setMarketScenario] = useState("rough");
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
@@ -48,6 +48,12 @@ function App() {
       return;
     }
 
+    if(maxAnnualSpending < annualSpending){
+      setError("Peak annual spending cannot be less than typical annual spending.");
+      setResult(null);
+      return;
+    }
+
     setError("");
 
     const result = calculateRequiredPrincipal({
@@ -68,6 +74,15 @@ function App() {
   return(
     <div>
       <h1>Checkout Calculator</h1>
+
+      <p className="subtitle">
+        How much money do you need in order to retire today?
+      </p>
+      <p className="calculator-information">
+        This calculator estimates the principal required to fund your lifestyle for the rest of your life, based on your spending, expected lifespan, projected healthcare costs, and market conditions.
+        <br/><br/>
+        This tool provides estimates for illustrative purposes only and does not constitute financial advice. All calculations occur within your browser; no information is transmitted or stored.
+      </p>
 
       <form className="calculator-form" onSubmit={handleCalculate}>
         
@@ -120,7 +135,7 @@ function App() {
             allowNegativeValue={false}
           />
           <small className="helper-text">
-            In today's dollars, how much do you expect to spend annually if you maintain your current lifestyle?
+            In today's dollars, how much do you expect to spend annually if you maintain your current lifestyle? Include all spending, including housing, food, healthcare, recreation, etc.
           </small>
         </div>
 
@@ -137,7 +152,7 @@ function App() {
             onChange={(e) => setHealthDeclineStartAge(Number(e.target.value))}
           />
           <small className="helper-text">
-            Consider increased cost of health care with age.
+            Consider increased cost of health care with age, such as more frequent doctor visits, more frequent medical procedures, and disability-related expenses.
           </small>
         </div>
 
@@ -154,7 +169,7 @@ function App() {
             onChange={(e) => setHealthDeclineMaxAge(Number(e.target.value))}
           />
           <small className="helper-text">
-            Consider late-life lifestyle changes, such as assisted living care.
+            Consider late-life lifestyle changes, such as home health care, assisted living, extended hospital stays, and medical equipment.
           </small>
         </div>
 
@@ -174,7 +189,7 @@ function App() {
             allowNegativeValue={false}
           />
           <small className="helper-text">
-            Consider the costs of late-life services, such as in-home care or assisted living.
+            Consider the costs of late-life services, such as home health care, assisted living, extended hospital stays, and medical equipment.
           </small>
         </div>
 
@@ -199,7 +214,7 @@ function App() {
 
         <div className="form-group">
           <label htmlFor="leftover">
-            How much money would like to have left over after you die?
+            How much money would you like to have left over after you die?
           </label>
           <CurrencyInput
             id="leftover"
@@ -218,7 +233,7 @@ function App() {
 
         <div className="form-group">
           <label htmlFor="market-scenario">
-            How lucky are you feeling in regards to market performance?
+            How lucky are you feeling in regards to future market performance?
           </label>
           <select
             id="market-scenario"
@@ -232,7 +247,7 @@ function App() {
             ))}
           </select>
           <small className="helper-text">
-            Simulates different market return sequences. The worse the early performance, the more conservative the final estimate will be.
+            Simulates different market return sequences. Primarily impacts early performance, where effects are more pronounced. The worse the market performance, the more conservative the final estimate will be.
           </small>
         </div>
 
@@ -243,7 +258,7 @@ function App() {
       {error && <p className="error">{error}</p>}
 
       {result != null && (
-        <p>Required Principal: ${Math.round(result).toLocaleString()}</p>
+        <p className="result">Required Principal: ${Math.round(result).toLocaleString()}</p>
       )}
     </div>
   );
