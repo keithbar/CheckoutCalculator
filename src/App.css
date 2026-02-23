@@ -10,6 +10,12 @@ body {
   color: #e5e7eb;
 }
 
+.page-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
 h1 {
   text-align: center;
   margin-top: 40px;

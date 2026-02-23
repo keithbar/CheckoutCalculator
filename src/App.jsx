@@ -82,7 +82,7 @@ function App() {
   }
 
   return(
-    <div>
+    <div className="page-container">
       <h1>Checkout Calculator</h1>
 
       <p className="subtitle">
